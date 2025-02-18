@@ -9,8 +9,8 @@ Sigue estos pasos para configurar el proyecto:
 1. **Clona el repositorio** (si tienes Git instalado):
 
    ```bash
-   git clone https://github.com/tu-usuario/vita-wallet-challenge.git
-   cd vita-wallet-challenge
+   git clone https://github.com/tu-usuario/vita-wallet-exchange.git
+   cd vita-wallet-exchange
    ```
 
 2. **Instala las dependencias del proyecto:**:
