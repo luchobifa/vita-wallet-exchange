@@ -26,6 +26,7 @@ export const Exchange = ({
   const { from, to } = values;
   const { isLoading, error, success } = status;
   const { onCurrencyChange, onAmountChange, onReset, onSubmit } = callbacks;
+  const isSubmitDisabled = isLoading || from.amount === 0 || to.amount === 0;
 
   const renderCurrencyField = (direction: ExchangeDirection) => {
     const { currency, amount } = direction === "from" ? from : to;
@@ -48,11 +49,10 @@ export const Exchange = ({
             }`}
           />
           <Input
+            value={amount || ""}
             variant={isUSD ? "money" : "default"}
-            min={0}
             id={`${direction}Amount`}
             name={`${direction}Amount`}
-            value={amount || ""}
             onChange={(e) => onAmountChange(direction, Number(e.target.value))}
             type="number"
             required
@@ -100,7 +100,7 @@ export const Exchange = ({
             type="submit"
             size="sm"
             variant={isLoading ? "disabled" : "primary"}
-            disabled={isLoading}
+            disabled={isSubmitDisabled}
           >
             {isLoading ? "Procesando..." : "Continuar"}
           </Button>
