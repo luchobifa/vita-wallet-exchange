@@ -7,8 +7,8 @@ import { authService } from "../services/AuthService";
 export const LoginForm = () => {
   const { setAuth } = useAuth();
   const [form, setForm] = useState({
-    email: "prospecto@vitawallet.io",
-    password: "Vita.1212",
+    email: "",
+    password: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,6 @@ export const LoginForm = () => {
                   ? "success"
                   : "default"
               }
-              // value={"prospecto@vitawallet.io"}
               placeholder="juan@gmail.com"
               inputSize="lg"
               required
@@ -66,7 +65,6 @@ export const LoginForm = () => {
             <Input
               id="password"
               value={form.password}
-              // value={"Vita.1212"}
               type="password"
               name="password"
               inputSize="lg"
