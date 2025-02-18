@@ -1,6 +1,6 @@
-import { formatPrice } from "../utils/PriceFormat";
 import IconImage from "./Icon/IconImage";
 import { iconImageType } from "./Icon/types";
+import Price from "./Price";
 
 type Props = {
   title: string;
@@ -16,11 +16,9 @@ export const CardBalance = ({ title, iconImageType, price }: Props) => (
     </div>
     <div className="flex items-center">
       {iconImageType === "usd" ? (
-        <p className="text-subtitle-2-semibold flex items-center">
-          $ {formatPrice(price)}
-        </p>
+        <Price variant="fiat" value={price} />
       ) : (
-        <p className="text-subtitle-2-semibold">{formatPrice(price)}</p>
+        <Price variant="crypto" value={price} />
       )}
     </div>
   </div>

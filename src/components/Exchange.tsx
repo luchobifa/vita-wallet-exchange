@@ -1,117 +1,84 @@
+import Button from "../components/Button";
+import { Input } from "../components/Input";
+import Modal from "../components/Modal";
+import { Selector } from "../components/Selector";
+import { ExchangeDirection } from "../types/exchange.hook.types";
+import {
+  ExchangeFormValues,
+  ExchangeStatus,
+  ExchangeCallbacks,
+} from "../types/exchangeComponent";
 import { CurrencyKeys } from "../types/price";
-import { Input } from "./Input";
-import { Selector } from "./Selector";
-import Button from "./Button";
-import { FormEvent } from "react";
-import Modal from "./Modal";
-import { Balances } from "../types/userProfile";
 
-type Props = {
-  from: {
-    amount: number;
-    currency: CurrencyKeys;
-  };
-  to: {
-    amount: number;
-    currency: CurrencyKeys;
-  };
-  handleContinue: (e: FormEvent<HTMLFormElement>) => void;
+type ExchangeProps = {
+  values: ExchangeFormValues;
+  status: ExchangeStatus;
   coins: CurrencyKeys[];
-  error: string | null;
-  isLoading: boolean;
-  userBalances: Balances;
-  handleToAmountChange: (value: string) => void;
-  handleFromAmountChange: (value: string) => void;
-  setFromCurrency: (currency: CurrencyKeys) => void;
-  setToCurrency: (currency: CurrencyKeys) => void;
-  success: boolean;
-  resetForm: () => void;
+  callbacks: ExchangeCallbacks;
 };
 
 export const Exchange = ({
-  handleContinue,
+  values,
+  status,
   coins,
-  from,
-  to,
-  error,
-  isLoading,
-  userBalances,
-  handleFromAmountChange,
-  handleToAmountChange,
-  setFromCurrency,
-  setToCurrency,
-  success,
-  resetForm,
-}: Props) => {
+  callbacks,
+}: ExchangeProps) => {
+  const { from, to } = values;
+  const { isLoading, error, success } = status;
+  const { onCurrencyChange, onAmountChange, onReset, onSubmit } = callbacks;
+
+  const renderCurrencyField = (direction: ExchangeDirection) => {
+    const { currency, amount } = direction === "from" ? from : to;
+    const isUSD = currency === "usd";
+
+    return (
+      <fieldset className="flex flex-col gap-4">
+        <legend className="text-body mb-4">
+          {direction === "from" ? "Monto a intercambiar" : "Quiero recibir"}
+        </legend>
+        <div className="flex gap-4">
+          <Selector
+            name={`${direction}Currency`}
+            id={`${direction}Currency`}
+            value={currency}
+            options={coins}
+            onSelect={(currency) => onCurrencyChange(direction, currency)}
+            aria-label={`Seleccionar moneda a ${
+              direction === "from" ? "enviar" : "recibir"
+            }`}
+          />
+          <Input
+            variant={isUSD ? "money" : "default"}
+            min={0}
+            id={`${direction}Amount`}
+            name={`${direction}Amount`}
+            value={amount || ""}
+            onChange={(e) => onAmountChange(direction, Number(e.target.value))}
+            type="number"
+            required
+            aria-label={`Monto a ${
+              direction === "from" ? "enviar" : "recibir"
+            }`}
+            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
+      </fieldset>
+    );
+  };
+
   return (
     <>
       <form
-        onSubmit={handleContinue}
+        onSubmit={onSubmit}
         className="flex flex-col justify-between h-full"
         noValidate
       >
         <div className="flex flex-col gap-12">
-          <fieldset className="flex flex-col gap-4 justify-between">
-            <legend className="text-body mb-4">Monto a intercambiar</legend>
-            <div className="flex gap-4">
-              <Selector
-                id="fromCurrency"
-                name="fromCurrency"
-                value={from.currency}
-                options={coins as CurrencyKeys[]}
-                onSelect={(e) => setFromCurrency(e)}
-                aria-label="Seleccionar moneda a enviar"
-              />
-              <Input
-                max={userBalances[from.currency]}
-                min={0}
-                id="fromAmount"
-                name="fromAmount"
-                variant={from.currency === "usd" ? "money" : undefined}
-                value={from.amount || ""}
-                onChange={(e) => handleFromAmountChange(e.target.value)}
-                type="number"
-                required
-                aria-label="Monto a enviar"
-                aria-describedby={error ? "exchange-error" : undefined}
-                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </div>
-          </fieldset>
-
-          <fieldset className="flex flex-col gap-4">
-            <legend className="text-body mb-4">Quiero recibir</legend>
-            <div className="flex gap-4">
-              <Selector
-                id="toCurrency"
-                name="toCurrency"
-                value={to.currency}
-                options={coins as CurrencyKeys[]}
-                onSelect={(e) => setToCurrency(e)}
-                aria-label="Seleccionar moneda a recibir"
-              />
-              <Input
-                max={userBalances[from.currency]}
-                min={0}
-                id="toAmount"
-                name="toAmount"
-                variant={to.currency === "usd" ? "money" : undefined}
-                value={to.amount || ""}
-                onChange={(e) => handleToAmountChange(e.target.value)}
-                type="number"
-                required
-                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                aria-label="Monto a recibir"
-              />
-            </div>
-          </fieldset>
+          {renderCurrencyField("from")}
+          {renderCurrencyField("to")}
 
           {error && (
-            <div
-              id="exchange-error"
-              role="alert"
-              className="text-red-600 text-sm mt-2"
-            >
+            <div role="alert" className="text-red-600 text-sm mt-2">
               {error}
             </div>
           )}
@@ -122,19 +89,18 @@ export const Exchange = ({
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              onReset();
+              window.history.back();
+            }}
           >
             Atrás
           </Button>
           <Button
             type="submit"
             size="sm"
-            variant={
-              isLoading || !from.amount || !to.amount || error
-                ? "disabled"
-                : "primary"
-            }
-            disabled={isLoading || !from.amount || !to.amount || !!error}
+            variant={isLoading ? "disabled" : "primary"}
+            disabled={isLoading}
           >
             {isLoading ? "Procesando..." : "Continuar"}
           </Button>
@@ -145,8 +111,8 @@ export const Exchange = ({
         <Modal
           imageUrl="/assets/success.png"
           isOpen={true}
-          onClose={() => resetForm()}
-          title={"Intercambio exitoso!"}
+          onClose={onReset}
+          title="Intercambio exitoso!"
           description={`Ya cuentas con los ${to.currency.toUpperCase()} en tu saldo`}
         />
       )}

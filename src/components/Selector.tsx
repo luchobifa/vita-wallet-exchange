@@ -25,6 +25,7 @@ export const Selector = ({
   return (
     <div className="relative">
       <button
+        type="button"
         id={id}
         name={name}
         aria-label={ariaLabel}
@@ -53,7 +54,7 @@ export const Selector = ({
               className="py-3 px-6 cursor-pointer hover:bg-gray-50"
               onClick={() => {
                 onSelect(option);
-                setIsOpen(false);
+                setIsOpen(!isOpen);
               }}
             >
               <IconImage type={option} className="m-auto" />
