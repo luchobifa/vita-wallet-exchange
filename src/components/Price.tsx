@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { formatCryptoPrice, formatPrice } from "../utils/PriceFormat";
 
-const priceStyles = cva("font-medium", {
+const priceStyles = cva("", {
   variants: {
     variant: {
       fiat: "text-subtitle",
