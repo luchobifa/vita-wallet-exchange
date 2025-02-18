@@ -53,7 +53,6 @@ class TransactionService extends ApiService {
   }
 
   async exchange(headers: AuthHeaders, data: ExchangeRequest) {
-    console.log("data", data);
     const response = this.api.post(
       "/transactions/exchange",
       {
