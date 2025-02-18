@@ -4,6 +4,7 @@ export type iconType =
   | "chile"
   | "select"
   | "close-icon"
-  | "style-dollar";
+  | "style-dollar"
+  | "eye";
 
 export type iconImageType = "chile" | "btc" | "usdt" | "usdc" | "usd";

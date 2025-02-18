@@ -26,12 +26,12 @@ const Modal: React.FC<ModalProps> = ({
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden"; // Bloquear scroll del fondo
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "auto"; // Restaurar scroll
+      document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
 

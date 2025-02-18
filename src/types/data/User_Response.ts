@@ -1,4 +1,3 @@
-// Define the structure of the API response data
 export type AuthDataResponse = {
   id: string;
   attributes: {

@@ -35,8 +35,9 @@ export const ConfirmExchange = ({
           </div>
           <div className="flex justify-between">
             <p className="text-caption-1">Tasa de cambio:</p>
-            <p className="text-buttons-others">
-              {prices[from.currency][`${to.currency}_sell`]}
+            <p className="text-buttons-others uppercase">
+              1 {to.currency} = {prices[from.currency][`${to.currency}_sell`]}{" "}
+              {from.currency}
             </p>
           </div>
           <div className="flex justify-between">

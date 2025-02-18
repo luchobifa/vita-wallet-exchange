@@ -34,29 +34,27 @@ export const ExchangePage = () => {
     setIsConfirmed(false);
   };
 
-  if (!userProfile || !prices?.prices) {
-    return <div>Error al cargar datos del usuario</div>;
-  }
-
   if (isConfirmed) {
     return (
       <div className="flex">
         <Sidebar />
-        <div className="w-[75vw] py-[120px] pl-[155px] pr-[120px] flex flex-col justify-between">
-          <ConfirmExchange
-            from={{
-              currency: exchangeState.currencies.from,
-              amount: exchangeState.amounts.from,
-            }}
-            to={{
-              currency: exchangeState.currencies.to,
-              amount: exchangeState.amounts.to,
-            }}
-            prices={prices.prices}
-            handleBack={handleBack}
-            handleExchangeConfirmation={handleExchangeConfirmation}
-          />
-        </div>
+        {prices && (
+          <div className="w-[75vw] py-[120px] pl-[155px] pr-[120px] flex flex-col justify-between">
+            <ConfirmExchange
+              from={{
+                currency: exchangeState.currencies.from,
+                amount: exchangeState.amounts.from,
+              }}
+              to={{
+                currency: exchangeState.currencies.to,
+                amount: exchangeState.amounts.to,
+              }}
+              prices={prices.prices}
+              handleBack={handleBack}
+              handleExchangeConfirmation={handleExchangeConfirmation}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -65,36 +63,40 @@ export const ExchangePage = () => {
     <div className="flex">
       <Sidebar />
       <div className="w-[75vw] py-[120px] pl-[155px] pr-[120px] flex flex-col justify-between">
-        <div className="flex flex-col gap-10 h-full">
-          <h1 className="text-subtitle">Qué deseas intercambiar?</h1>
-          <p className="text-buttons-others text-blue-2">
-            {`Saldo disponible: $${formatPrice(userProfile?.balances.usd)}`}
-          </p>
-          <Exchange
-            values={{
-              from: {
-                currency: exchangeState.currencies.from,
-                amount: exchangeState.amounts.from,
-              },
-              to: {
-                currency: exchangeState.currencies.to,
-                amount: exchangeState.amounts.to,
-              },
-            }}
-            status={{
-              isLoading: exchangeState.status.isLoading,
-              error: exchangeState.status.error,
-              success: exchangeState.status.success,
-            }}
-            coins={coins}
-            callbacks={{
-              onCurrencyChange: exchangeActions.setCurrency,
-              onAmountChange: exchangeActions.setAmount,
-              onReset: exchangeActions.reset,
-              onSubmit: handleContinue,
-            }}
-          />
-        </div>
+        {userProfile && prices && (
+          <div className="flex flex-col gap-10 h-full">
+            <h1 className="text-subtitle">Qué deseas intercambiar?</h1>
+            <p className="text-buttons-others text-blue-2">
+              {`Saldo disponible: $${formatPrice(
+                userProfile?.balances.usd
+              )} USD`}
+            </p>
+            <Exchange
+              values={{
+                from: {
+                  currency: exchangeState.currencies.from,
+                  amount: exchangeState.amounts.from,
+                },
+                to: {
+                  currency: exchangeState.currencies.to,
+                  amount: exchangeState.amounts.to,
+                },
+              }}
+              status={{
+                isLoading: exchangeState.status.isLoading,
+                error: exchangeState.status.error,
+                success: exchangeState.status.success,
+              }}
+              coins={coins}
+              callbacks={{
+                onCurrencyChange: exchangeActions.setCurrency,
+                onAmountChange: exchangeActions.setAmount,
+                onReset: exchangeActions.reset,
+                onSubmit: handleContinue,
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

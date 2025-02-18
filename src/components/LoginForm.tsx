@@ -43,6 +43,11 @@ export const LoginForm = () => {
               type="email"
               name="email"
               value={form.email}
+              variant={
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+                  ? "success"
+                  : "default"
+              }
               // value={"prospecto@vitawallet.io"}
               placeholder="juan@gmail.com"
               inputSize="lg"
@@ -67,6 +72,7 @@ export const LoginForm = () => {
               inputSize="lg"
               placeholder="Escribe tu contraseña"
               required
+              variant={"password"}
               onChange={(e) =>
                 setForm({
                   ...form,
