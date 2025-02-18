@@ -3,12 +3,11 @@ import { Exchange } from "../components/Exchange";
 import Sidebar from "../components/Sidebar/Sidebar";
 import { useUser } from "../hooks/User.hooks";
 import { useExchangeForm } from "../hooks/useExchangeForm.hooks";
-import { Prices } from "../types/price";
 import { ConfirmExchange } from "../components/ConfirmExchange";
 import { formatPrice } from "../utils/PriceFormat";
 
 export const ExchangePage = () => {
-  const { userProfile, prices } = useUser();
+  const { userProfile } = useUser();
   const [isConfirmed, setIsConfirmed] = useState(false);
 
   const {
@@ -17,7 +16,8 @@ export const ExchangePage = () => {
     exchangeActions,
     exchangeCalculations,
     executeExchange,
-  } = useExchangeForm(prices as Prices);
+    prices,
+  } = useExchangeForm();
 
   const handleBack = () => setIsConfirmed(false);
 
@@ -34,8 +34,8 @@ export const ExchangePage = () => {
     setIsConfirmed(false);
   };
 
-  if (!userProfile || !prices) {
-    return <div>Error al cargar datos del usuario y precios</div>;
+  if (!userProfile || !prices?.prices) {
+    return <div>Error al cargar datos del usuario</div>;
   }
 
   if (isConfirmed) {

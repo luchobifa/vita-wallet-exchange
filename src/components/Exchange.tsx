@@ -99,8 +99,7 @@ export const Exchange = ({
           <Button
             type="submit"
             size="sm"
-            variant={isLoading ? "disabled" : "primary"}
-            disabled={isSubmitDisabled}
+            variant={isSubmitDisabled ? "disabled" : "primary"}
           >
             {isLoading ? "Procesando..." : "Continuar"}
           </Button>

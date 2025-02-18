@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useMemo } from "react";
+import { useReducer, useEffect, useCallback, useMemo, useState } from "react";
 import {
   exchangeFormReducer,
   initialState,
@@ -16,10 +16,24 @@ import {
   calculateReverseExchange,
 } from "../utils/calculateExchange";
 
-const useExchangeManager = (prices: Prices) => {
+const useExchangeManager = () => {
   const { headers } = useAuth();
   const { userProfile } = useUser();
   const [state, dispatch] = useReducer(exchangeFormReducer, initialState);
+  const [prices, setPrices] = useState<Prices | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      if (!headers) return;
+      try {
+        const pricesData = await transactionService.getCryptoPrices(headers);
+        setPrices(pricesData);
+      } catch (error) {
+        console.error("Error fetching crypto prices", error);
+      }
+    };
+    fetchPrices();
+  }, []);
 
   const actions: ExchangeActions = useMemo(
     () => ({
@@ -53,11 +67,12 @@ const useExchangeManager = (prices: Prices) => {
   const calculations: ExchangeCalculations = useMemo(
     () => ({
       convertAmount: (direction) => {
+        if (!prices?.prices) return 0;
         const { from, to } = state.currencies;
         const amount = state.amounts[direction];
         return direction === "from"
-          ? calculateExchange(amount, from, to, prices.prices)
-          : calculateReverseExchange(amount, from, to, prices.prices);
+          ? calculateExchange(amount, from, to, prices?.prices)
+          : calculateReverseExchange(amount, from, to, prices?.prices);
       },
       validateBalance: () => {
         if (!userProfile) return false;
@@ -69,14 +84,13 @@ const useExchangeManager = (prices: Prices) => {
         return requiredBalance <= userProfile.balances[state.currencies.from];
       },
     }),
-    [state, userProfile, prices.prices]
+    [state, userProfile, prices?.prices]
   );
 
   useEffect(() => {
     if (!state.lastEdited || !state.amounts[state.lastEdited]) return;
     const newAmount = calculations.convertAmount(state.lastEdited);
     const targetDirection = state.lastEdited === "from" ? "to" : "from";
-    // Verifica si el nuevo valor es igual al actual antes de actualizar
     if (state.amounts[targetDirection] !== Number(newAmount)) {
       dispatch({
         type: "SET_AMOUNT",
@@ -86,7 +100,7 @@ const useExchangeManager = (prices: Prices) => {
         },
       });
     }
-  }, [state.currencies, state.lastEdited, prices.prices, state.amounts]);
+  }, [state.currencies, state.lastEdited, prices?.prices, state.amounts]);
 
   const executeExchange = useCallback(async () => {
     if (!calculations.validateBalance() || !headers) {
@@ -118,14 +132,14 @@ const useExchangeManager = (prices: Prices) => {
     }
   }, [state, headers, calculations.validateBalance]);
 
-  return { state, actions, calculations, executeExchange };
+  return { state, actions, calculations, executeExchange, prices };
 };
 
-export const useExchangeForm = (prices: Prices) => {
-  const exchange = useExchangeManager(prices);
+export const useExchangeForm = () => {
+  const exchange = useExchangeManager();
   const coins = useMemo(
-    () => Object.keys(prices.prices) as CurrencyKeys[],
-    [prices]
+    () => Object.keys(exchange.prices?.prices || {}) as CurrencyKeys[],
+    [exchange.prices]
   );
 
   return {
@@ -134,5 +148,6 @@ export const useExchangeForm = (prices: Prices) => {
     exchangeActions: exchange.actions,
     exchangeCalculations: exchange.calculations,
     executeExchange: exchange.executeExchange,
+    prices: exchange.prices,
   };
 };
