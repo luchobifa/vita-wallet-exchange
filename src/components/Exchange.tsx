@@ -26,7 +26,11 @@ export const Exchange = ({
   const { from, to } = values;
   const { isLoading, error, success } = status;
   const { onCurrencyChange, onAmountChange, onReset, onSubmit } = callbacks;
-  const isSubmitDisabled = isLoading || from.amount === 0 || to.amount === 0;
+  const isSubmitDisabled =
+    isLoading ||
+    from.amount === 0 ||
+    to.amount === 0 ||
+    from.currency === to.currency;
 
   const renderCurrencyField = (direction: ExchangeDirection) => {
     const { currency, amount } = direction === "from" ? from : to;
