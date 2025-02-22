@@ -12,7 +12,7 @@ const inputVariants = cva(
         error: "",
         money: "px-12",
         success: "",
-        password: "pr-12", // Espacio para el icono
+        password: "pr-12",
       },
       inputSize: {
         lg: "",

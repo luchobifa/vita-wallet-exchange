@@ -18,22 +18,9 @@ import {
 
 const useExchangeManager = () => {
   const { headers } = useAuth();
-  const { userProfile } = useUser();
+  const { userProfile, reloadTransactions, reloadUserProfile } = useUser();
   const [state, dispatch] = useReducer(exchangeFormReducer, initialState);
   const [prices, setPrices] = useState<Prices | undefined>(undefined);
-
-  useEffect(() => {
-    const fetchPrices = async () => {
-      if (!headers) return;
-      try {
-        const pricesData = await transactionService.getCryptoPrices(headers);
-        setPrices(pricesData);
-      } catch (error) {
-        console.error("Error fetching crypto prices", error);
-      }
-    };
-    fetchPrices();
-  }, []);
 
   const actions: ExchangeActions = useMemo(
     () => ({
@@ -88,6 +75,19 @@ const useExchangeManager = () => {
   );
 
   useEffect(() => {
+    const fetchPrices = async () => {
+      if (!headers) return;
+      try {
+        const pricesData = await transactionService.getCryptoPrices(headers);
+        setPrices(pricesData);
+      } catch (error) {
+        console.error("Error fetching crypto prices", error);
+      }
+    };
+    fetchPrices();
+  }, [headers]);
+
+  useEffect(() => {
     if (!state.lastEdited || !state.amounts[state.lastEdited]) return;
     const newAmount = calculations.convertAmount(state.lastEdited);
     const targetDirection = state.lastEdited === "from" ? "to" : "from";
@@ -100,7 +100,13 @@ const useExchangeManager = () => {
         },
       });
     }
-  }, [state.currencies, state.lastEdited, prices?.prices, state.amounts]);
+  }, [
+    state.currencies,
+    state.lastEdited,
+    prices?.prices,
+    state.amounts,
+    calculations,
+  ]);
 
   const executeExchange = useCallback(async () => {
     if (!calculations.validateBalance() || !headers) {
@@ -112,16 +118,21 @@ const useExchangeManager = () => {
       });
       return;
     }
-    dispatch({ type: "SET_STATUS", payload: { isLoading: true, error: null } });
+    dispatch({
+      type: "SET_STATUS",
+      payload: { ...state.status, isLoading: true, error: null },
+    });
     try {
       await transactionService.exchange(headers, {
         fromCurrency: state.currencies.from,
         toCurrency: state.currencies.to,
         amountSent: state.amounts.from,
       });
-
-      dispatch({ type: "SET_STATUS", payload: { success: true } });
-      dispatch({ type: "RESET" });
+      await Promise.all([reloadUserProfile(), reloadTransactions()]);
+      dispatch({
+        type: "SET_STATUS",
+        payload: { ...state.status, success: true },
+      });
     } catch (error) {
       dispatch({
         type: "SET_STATUS",
@@ -130,7 +141,16 @@ const useExchangeManager = () => {
         },
       });
     }
-  }, [state, headers, calculations.validateBalance]);
+  }, [
+    calculations,
+    headers,
+    state.status,
+    state.currencies.from,
+    state.currencies.to,
+    state.amounts.from,
+    reloadUserProfile,
+    reloadTransactions,
+  ]);
 
   return { state, actions, calculations, executeExchange, prices };
 };
