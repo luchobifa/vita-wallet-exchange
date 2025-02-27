@@ -4,7 +4,7 @@ import { ApiService } from "./ApiService";
 
 class AuthService extends ApiService {
   constructor() {
-    super("https://api.qa.vitawallet.io/api");
+    super();
   }
 
   async signIn(credentials: SignInCredentials) {
