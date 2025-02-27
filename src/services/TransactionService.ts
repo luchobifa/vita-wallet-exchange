@@ -7,7 +7,7 @@ import { ApiService } from "./ApiService";
 
 class TransactionService extends ApiService {
   constructor() {
-    super("https://api.qa.vitawallet.io/api");
+    super();
   }
 
   async getCryptoPrices(headers: AuthHeaders) {
