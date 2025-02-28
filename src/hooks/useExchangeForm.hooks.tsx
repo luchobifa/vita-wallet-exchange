@@ -67,11 +67,26 @@ const useExchangeManager = () => {
           state.lastEdited === "from"
             ? state.amounts.from
             : calculations.convertAmount("to");
-
-        return requiredBalance <= userProfile.balances[state.currencies.from];
+        const isOk =
+          requiredBalance <= userProfile.balances[state.currencies.from];
+        if (!isOk) {
+          dispatch({
+            type: "SET_STATUS",
+            payload: {
+              error: "Saldo insuficiente para realizar la operación",
+            },
+          });
+        }
+        return isOk;
       },
     }),
-    [state, userProfile, prices?.prices]
+    [
+      prices?.prices,
+      state.currencies,
+      state.amounts,
+      state.lastEdited,
+      userProfile,
+    ]
   );
 
   useEffect(() => {
@@ -88,7 +103,12 @@ const useExchangeManager = () => {
   }, [headers]);
 
   useEffect(() => {
-    if (!state.lastEdited || !state.amounts[state.lastEdited]) return;
+    if (
+      !state.lastEdited ||
+      !state.amounts[state.lastEdited] ||
+      state.currencies.from === state.currencies.to
+    )
+      return;
     const newAmount = calculations.convertAmount(state.lastEdited);
     const targetDirection = state.lastEdited === "from" ? "to" : "from";
     if (state.amounts[targetDirection] !== Number(newAmount)) {
@@ -109,15 +129,7 @@ const useExchangeManager = () => {
   ]);
 
   const executeExchange = useCallback(async () => {
-    if (!calculations.validateBalance() || !headers) {
-      dispatch({
-        type: "SET_STATUS",
-        payload: {
-          error: "Saldo insuficiente para realizar la operación",
-        },
-      });
-      return;
-    }
+    if (!calculations.validateBalance() || !headers) return;
     dispatch({
       type: "SET_STATUS",
       payload: { ...state.status, isLoading: true, error: null },
